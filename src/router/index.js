@@ -114,8 +114,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    name: 'not-found',
-    component: () => import('@/views/errors/NotFoundView.vue'),
+    redirect: '/dashboard',
   },
 ];
 
