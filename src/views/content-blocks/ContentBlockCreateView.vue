@@ -17,29 +17,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useContentBlockStore } from '@/stores/contentBlock';
-import ContentBlockForm from '@/components/content-blocks/ContentBlockForm.vue';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import { buildContentBlockFormData } from '@/utils/contentBlockFormData';
+import ContentBlockForm from '@/components/content-blocks/ContentBlockForm.vue';
 
 const router = useRouter();
 const contentBlockStore = useContentBlockStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 async function handleCreate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     const formData = buildContentBlockFormData(payload);
     await contentBlockStore.createContentBlock(formData);
-    router.push('/content-blocks');
+    notify.success('Content block created successfully.');
+    await router.push('/content-blocks');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to create content block.');
-    }
+    const message = getErrorMessage(error, 'Failed to create content block.');
+    if (message) notify.error(message);
   }
 }
 </script>

@@ -15,27 +15,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/category';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import CategoryForm from '@/components/categories/CategoryForm.vue';
 
 const router = useRouter();
 const categoryStore = useCategoryStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 async function handleCreate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     await categoryStore.createCategory(payload);
-    router.push('/categories');
+    notify.success('Category created successfully.');
+    await router.push('/categories');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to create category.');
-    }
+    const message = getErrorMessage(error, 'Failed to create category.');
+    if (message) notify.error(message);
   }
 }
 </script>

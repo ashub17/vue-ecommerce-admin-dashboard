@@ -18,21 +18,13 @@
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Subtitle
-        </label>
-        <textarea
-          v-model="form.subtitle"
-          rows="4"
-          placeholder="Enter banner subtitle"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
-        ></textarea>
-
-        <p v-if="errors.subtitle" class="text-sm text-red-500 mt-1">
-          {{ errors.subtitle[0] || errors.subtitle }}
-        </p>
-      </div>
+      <AppTextarea
+        v-model="form.subtitle"
+        label="Subtitle"
+        placeholder="Enter banner subtitle"
+        :rows="4"
+        :error="errors.subtitle?.[0] || errors.subtitle"
+      />
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <AppInput
@@ -106,6 +98,7 @@
 import { reactive, ref, watch } from 'vue';
 import AppInput from '@/components/ui/AppInput.vue';
 import AppButton from '@/components/ui/AppButton.vue';
+import AppTextarea from '@/components/ui/AppTextarea.vue';
 import { buildImageUrl } from '@/utils/helpers';
 
 const props = defineProps({

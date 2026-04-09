@@ -7,12 +7,10 @@
       </p>
     </div>
 
-    <div
+    <AppLoadingState
       v-if="categoryStore.listLoading"
-      class="bg-white rounded-2xl border border-gray-200 p-6"
-    >
-      Loading categories...
-    </div>
+      message="Loading categories..."
+    />
 
     <ProductForm
       v-else
@@ -26,35 +24,38 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/product';
 import { useCategoryStore } from '@/stores/category';
-import ProductForm from '@/components/products/ProductForm.vue';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import { buildProductFormData } from '@/utils/productFormData';
+import ProductForm from '@/components/products/ProductForm.vue';
+import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
 
 const router = useRouter();
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 onMounted(() => {
-  categoryStore.fetchCategories();
+  categoryStore.fetchCategories({ per_page: 1000 });
 });
 
 async function handleCreate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     const formData = buildProductFormData(payload);
     await productStore.createProduct(formData);
-    router.push('/products');
+    notify.success('Product created successfully.');
+    await router.push('/products');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to create product.');
-    }
+    const message = getErrorMessage(error, 'Failed to create product.');
+    if (message) notify.error(message);
   }
 }
 </script>

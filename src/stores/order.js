@@ -19,19 +19,27 @@ export const useOrderStore = defineStore('order', {
 
       try {
         const response = await getOrders(params);
-        const data = response.data;
 
-        if (Array.isArray(data)) {
-          this.orders = data;
+        // Supports both:
+        // 1) Laravel paginator directly in response.data
+        // 2) Wrapped paginator in response.data.data
+        const payload = response.data?.data?.data
+          ? response.data.data
+          : response.data;
+
+        if (Array.isArray(payload)) {
+          this.orders = payload;
           this.meta = null;
         } else {
-          this.orders = data.data || [];
-          this.meta = {
-            current_page: data.current_page,
-            last_page: data.last_page,
-            per_page: data.per_page,
-            total: data.total,
-          };
+          this.orders = Array.isArray(payload?.data) ? payload.data : [];
+          this.meta = payload
+            ? {
+                current_page: payload.current_page ?? 1,
+                last_page: payload.last_page ?? 1,
+                per_page: payload.per_page ?? this.orders.length ?? 0,
+                total: payload.total ?? this.orders.length ?? 0,
+              }
+            : null;
         }
 
         return response;
@@ -45,7 +53,12 @@ export const useOrderStore = defineStore('order', {
 
       try {
         const response = await getOrder(id);
-        this.order = response.data?.data || response.data;
+
+        // Supports:
+        // 1) response.data = order
+        // 2) response.data.data = order
+        this.order = response.data?.data || response.data || null;
+
         return this.order;
       } finally {
         this.loading = false;

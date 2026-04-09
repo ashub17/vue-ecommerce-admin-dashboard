@@ -7,7 +7,7 @@
 
       <main class="p-4 md:p-6">
         <div class="max-w-7xl mx-auto">
-          <RouterView />
+          <RouterView :key="route.fullPath" />
         </div>
       </main>
     </div>
@@ -16,8 +16,10 @@
 
 <script setup>
 import { ref } from 'vue';
-import AdminSidebar from '@/components/layouts/AdminSidebar.vue';
-import AdminNavbar from '@/components/layouts/AdminNavbar.vue';
+import { useRoute } from 'vue-router';
+import AdminSidebar from '@/components/layout/AdminSidebar.vue';
+import AdminNavbar from '@/components/layout/AdminNavbar.vue';
 
 const sidebarOpen = ref(false);
+const route = useRoute();
 </script>

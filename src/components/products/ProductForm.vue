@@ -2,27 +2,13 @@
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
     <form @submit.prevent="handleSubmit" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Category
-          </label>
-          <select
-            v-model="form.category_id"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
-          >
-            <option value="">Select category</option>
-            <option
-              v-for="category in categories"
-              :key="category.id"
-              :value="String(category.id)"
-            >
-              {{ category.name }}
-            </option>
-          </select>
-          <p v-if="errors.category_id" class="text-sm text-red-500 mt-1">
-            {{ errors.category_id[0] || errors.category_id }}
-          </p>
-        </div>
+        <AppSelect
+          v-model="form.category_id"
+          label="Category"
+          placeholder="Select category"
+          :options="categoryOptions"
+          :error="errors.category_id?.[0] || errors.category_id"
+        />
 
         <AppInput
           v-model="form.name"
@@ -48,35 +34,21 @@
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Short Description
-        </label>
-        <textarea
-          v-model="form.short_description"
-          rows="3"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
-          placeholder="Enter short description"
-        ></textarea>
-        <p v-if="errors.short_description" class="text-sm text-red-500 mt-1">
-          {{ errors.short_description[0] || errors.short_description }}
-        </p>
-      </div>
+      <AppTextarea
+        v-model="form.short_description"
+        label="Short Description"
+        placeholder="Enter short description"
+        :rows="3"
+        :error="errors.short_description?.[0] || errors.short_description"
+      />
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Description
-        </label>
-        <textarea
-          v-model="form.description"
-          rows="5"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
-          placeholder="Enter full description"
-        ></textarea>
-        <p v-if="errors.description" class="text-sm text-red-500 mt-1">
-          {{ errors.description[0] || errors.description }}
-        </p>
-      </div>
+      <AppTextarea
+        v-model="form.description"
+        label="Description"
+        placeholder="Enter full description"
+        :rows="5"
+        :error="errors.description?.[0] || errors.description"
+      />
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <AppInput
@@ -131,11 +103,12 @@
           />
           <span class="text-sm text-gray-700">Replace Gallery</span>
         </label>
-        <p v-if="form.replace_gallery" class="text-sm text-amber-600">
-          Uploading new gallery images will replace the existing gallery on
-          update.
-        </p>
       </div>
+
+      <p v-if="form.replace_gallery" class="text-sm text-amber-600">
+        Uploading new gallery images will replace the existing gallery on
+        update.
+      </p>
 
       <div class="border-t border-gray-200 pt-6 space-y-5">
         <div>
@@ -259,9 +232,11 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import AppInput from '@/components/ui/AppInput.vue';
 import AppButton from '@/components/ui/AppButton.vue';
+import AppTextarea from '@/components/ui/AppTextarea.vue';
+import AppSelect from '@/components/ui/AppSelect.vue';
 import { buildImageUrl, makeSlug } from '@/utils/helpers';
 
 const props = defineProps({
@@ -305,36 +280,11 @@ const form = reactive({
 const featuredImagePreview = ref('');
 const galleryInputs = ref([]);
 
-watch(
-  () => props.initialValues,
-  (values) => {
-    form.category_id = values?.category_id ? String(values.category_id) : '';
-    form.name = values?.name ?? '';
-    form.sku = values?.sku ?? '';
-    form.slug = values?.slug ?? '';
-    form.short_description = values?.short_description ?? '';
-    form.description = values?.description ?? '';
-    form.price = values?.price ?? '';
-    form.sale_price = values?.sale_price ?? '';
-    form.stock_quantity = values?.stock_quantity ?? '';
-    form.is_active = values?.is_active ?? true;
-    form.is_featured = values?.is_featured ?? false;
-    form.featured_image = null;
-
-    featuredImagePreview.value = values?.featured_image
-      ? buildImageUrl(values.featured_image)
-      : '';
-
-    galleryInputs.value = Array.isArray(values?.images)
-      ? values.images.map((image, index) => ({
-          file: null,
-          sort_order: image.sort_order ?? index + 1,
-          preview: image.image_path ? buildImageUrl(image.image_path) : '',
-          existing_id: image.id ?? null,
-        }))
-      : [];
-  },
-  { immediate: true, deep: true },
+const categoryOptions = computed(() =>
+  props.categories.map((category) => ({
+    label: category.name,
+    value: String(category.id),
+  })),
 );
 
 watch(
@@ -351,8 +301,8 @@ watch(
     form.stock_quantity = values?.stock_quantity ?? '';
     form.is_active = values?.is_active ?? true;
     form.is_featured = values?.is_featured ?? false;
-    form.featured_image = null;
     form.replace_gallery = false;
+    form.featured_image = null;
 
     featuredImagePreview.value =
       values?.featured_image_url ||
@@ -371,23 +321,23 @@ watch(
   },
   { immediate: true, deep: true },
 );
+
+watch(
+  () => form.name,
+  (value) => {
+    if (!props.initialValues?.id && !form.slug) {
+      form.slug = makeSlug(value);
+    }
+  },
+);
+
 watch(
   () => form.replace_gallery,
   (enabled) => {
     if (enabled && galleryInputs.value.length === 0) {
       galleryInputs.value.push(
-        {
-          file: null,
-          sort_order: 1,
-          preview: '',
-          existing_id: null,
-        },
-        {
-          file: null,
-          sort_order: 2,
-          preview: '',
-          existing_id: null,
-        },
+        { file: null, sort_order: 1, preview: '', existing_id: null },
+        { file: null, sort_order: 2, preview: '', existing_id: null },
       );
     }
   },

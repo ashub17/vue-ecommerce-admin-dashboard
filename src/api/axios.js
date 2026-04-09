@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken, clearAuthStorage } from '@/utils/storage';
+import router from '@/router';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -23,12 +24,12 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       clearAuthStorage();
 
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+      if (router.currentRoute.value.path !== '/login') {
+        await router.replace('/login');
       }
     }
 

@@ -24,19 +24,19 @@
             class="border-t border-gray-100"
           >
             <td class="px-4 py-3">
-              {{ item.product_name || item.name || item.product?.name }}
+              {{ item.product_name || item.name || item.product?.name || '-' }}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{ item.product_sku || item.sku || item.product?.sku || '-' }}
+              {{ item.product?.sku || item.product_sku || item.sku || '-' }}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{ formatCurrency(item.price) }}
+              {{ formatCurrency(item.product_price || item.price || 0) }}
             </td>
             <td class="px-4 py-3 text-gray-600">
-              {{ item.quantity }}
+              {{ item.quantity || 0 }}
             </td>
             <td class="px-4 py-3 font-medium text-gray-900">
-              {{ formatCurrency(item.subtotal || item.price * item.quantity) }}
+              {{ formatCurrency(item.subtotal || 0) }}
             </td>
           </tr>
 

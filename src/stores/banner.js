@@ -26,19 +26,27 @@ export const useBannerStore = defineStore('banner', {
 
       try {
         const response = await getBanners(params);
-        const data = response.data;
 
-        if (Array.isArray(data)) {
-          this.banners = data;
+        // Supports both:
+        // 1) paginator directly in response.data
+        // 2) wrapped paginator in response.data.data
+        const payload = response.data?.data?.data
+          ? response.data.data
+          : response.data;
+
+        if (Array.isArray(payload)) {
+          this.banners = payload;
           this.meta = null;
         } else {
-          this.banners = data.data || [];
-          this.meta = {
-            current_page: data.current_page,
-            last_page: data.last_page,
-            per_page: data.per_page,
-            total: data.total,
-          };
+          this.banners = Array.isArray(payload?.data) ? payload.data : [];
+          this.meta = payload
+            ? {
+                current_page: payload.current_page ?? 1,
+                last_page: payload.last_page ?? 1,
+                per_page: payload.per_page ?? this.banners.length ?? 0,
+                total: payload.total ?? this.banners.length ?? 0,
+              }
+            : null;
         }
 
         return response;
@@ -52,7 +60,7 @@ export const useBannerStore = defineStore('banner', {
 
       try {
         const response = await getBanner(id);
-        this.banner = response.data?.data || response.data;
+        this.banner = response.data?.data || response.data || null;
         return this.banner;
       } finally {
         this.loading = false;

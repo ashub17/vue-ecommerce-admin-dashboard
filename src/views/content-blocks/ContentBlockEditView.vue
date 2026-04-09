@@ -5,12 +5,10 @@
       <p class="text-sm text-gray-500 mt-1">Update content block information</p>
     </div>
 
-    <div
+    <AppLoadingState
       v-if="contentBlockStore.loading"
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-gray-500"
-    >
-      Loading content block...
-    </div>
+      message="Loading content block..."
+    />
 
     <ContentBlockForm
       v-else
@@ -24,19 +22,30 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useContentBlockStore } from '@/stores/contentBlock';
-import ContentBlockForm from '@/components/content-blocks/ContentBlockForm.vue';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import { buildContentBlockFormData } from '@/utils/contentBlockFormData';
+import ContentBlockForm from '@/components/content-blocks/ContentBlockForm.vue';
+import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
 
 const route = useRoute();
 const router = useRouter();
 const contentBlockStore = useContentBlockStore();
-const errors = ref({});
+const notify = useNotify();
 
-onMounted(() => {
-  contentBlockStore.fetchContentBlock(route.params.id);
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
+
+onMounted(async () => {
+  try {
+    await contentBlockStore.fetchContentBlock(route.params.id);
+  } catch (error) {
+    notify.error(
+      error.response?.data?.message || 'Failed to load content block.',
+    );
+  }
 });
 
 onUnmounted(() => {
@@ -44,18 +53,16 @@ onUnmounted(() => {
 });
 
 async function handleUpdate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     const formData = buildContentBlockFormData(payload, true);
     await contentBlockStore.updateContentBlock(route.params.id, formData);
-    router.push('/content-blocks');
+    notify.success('Content block updated successfully.');
+    await router.push('/content-blocks');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to update content block.');
-    }
+    const message = getErrorMessage(error, 'Failed to update content block.');
+    if (message) notify.error(message);
   }
 }
 </script>

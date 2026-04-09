@@ -17,21 +17,13 @@
         />
       </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Content
-        </label>
-        <textarea
-          v-model="form.content"
-          rows="6"
-          placeholder="Enter content block text"
-          class="w-full rounded-lg border border-gray-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900"
-        ></textarea>
-
-        <p v-if="errors.content" class="text-sm text-red-500 mt-1">
-          {{ errors.content[0] || errors.content }}
-        </p>
-      </div>
+      <AppTextarea
+        v-model="form.content"
+        label="Content"
+        placeholder="Enter content block text"
+        :rows="6"
+        :error="errors.content?.[0] || errors.content"
+      />
 
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -109,6 +101,7 @@
 import { reactive, ref, watch } from 'vue';
 import AppInput from '@/components/ui/AppInput.vue';
 import AppButton from '@/components/ui/AppButton.vue';
+import AppTextarea from '@/components/ui/AppTextarea.vue';
 import { buildImageUrl } from '@/utils/helpers';
 
 const props = defineProps({

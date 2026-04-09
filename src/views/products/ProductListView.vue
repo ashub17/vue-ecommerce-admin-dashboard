@@ -16,154 +16,129 @@
       </RouterLink>
     </div>
 
-    <div
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
-    >
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 text-left text-gray-600">
-            <tr>
-              <th class="px-4 py-3">#</th>
-              <th class="px-4 py-3">Image</th>
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">SKU</th>
-              <th class="px-4 py-3">Price</th>
-              <th class="px-4 py-3">Stock</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3">Actions</th>
-            </tr>
-          </thead>
+    <AppTable>
+      <thead class="bg-gray-50 text-left text-gray-600">
+        <tr>
+          <th class="px-4 py-3">#</th>
+          <th class="px-4 py-3">Image</th>
+          <th class="px-4 py-3">Name</th>
+          <th class="px-4 py-3">SKU</th>
+          <th class="px-4 py-3">Price</th>
+          <th class="px-4 py-3">Stock</th>
+          <th class="px-4 py-3">Status</th>
+          <th class="px-4 py-3">Actions</th>
+        </tr>
+      </thead>
 
-          <tbody>
-            <tr v-if="productStore.listLoading">
-              <td colspan="8" class="px-4 py-6 text-center text-gray-500">
-                Loading products...
-              </td>
-            </tr>
+      <tbody>
+        <tr v-if="productStore.listLoading">
+          <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+            Loading products...
+          </td>
+        </tr>
 
-            <tr
-              v-for="(product, index) in productStore.products"
-              :key="product.id"
-              class="border-t border-gray-100"
+        <tr
+          v-for="(product, index) in productStore.products"
+          :key="product.id"
+          class="border-t border-gray-100"
+        >
+          <td class="px-4 py-3 text-gray-600">
+            {{ rowNumber(index) }}
+          </td>
+
+          <td class="px-4 py-3">
+            <img
+              v-if="product.featured_image || product.featured_image_url"
+              :src="
+                product.featured_image_url ||
+                buildImageUrl(product.featured_image)
+              "
+              alt="Product"
+              class="h-14 w-14 rounded-xl object-cover border border-gray-200"
+            />
+            <div
+              v-else
+              class="h-14 w-14 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-400"
             >
-              <td class="px-4 py-3 text-gray-600">
-                {{ rowNumber(index) }}
-              </td>
-              <td class="px-4 py-3">
-                <img
-                  v-if="product.featured_image || product.featured_image_url"
-                  :src="
-                    product.featured_image_url ||
-                    buildImageUrl(product.featured_image)
-                  "
-                  alt="Product"
-                  class="h-14 w-14 rounded-xl object-cover border border-gray-200"
-                />
-                <div
-                  v-else
-                  class="h-14 w-14 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-xs text-gray-400"
-                >
-                  No image
-                </div>
-              </td>
+              No image
+            </div>
+          </td>
 
-              <td class="px-4 py-3">
-                <div class="font-medium text-gray-900">
-                  {{ product.name }}
-                </div>
-                <div
-                  v-if="product.is_featured"
-                  class="text-xs text-blue-600 mt-1"
-                >
-                  Featured
-                </div>
-              </td>
+          <td class="px-4 py-3">
+            <div class="font-medium text-gray-900">
+              {{ product.name }}
+            </div>
+            <div v-if="product.is_featured" class="text-xs text-blue-600 mt-1">
+              Featured
+            </div>
+          </td>
 
-              <td class="px-4 py-3 text-gray-600">
-                {{ product.sku }}
-              </td>
+          <td class="px-4 py-3 text-gray-600">
+            {{ product.sku }}
+          </td>
 
-              <td class="px-4 py-3 text-gray-600">
-                <div>{{ formatCurrency(product.price) }}</div>
-                <div v-if="product.sale_price" class="text-xs text-green-600">
-                  Sale: {{ formatCurrency(product.sale_price) }}
-                </div>
-              </td>
+          <td class="px-4 py-3 text-gray-600">
+            <div>{{ formatCurrency(product.price) }}</div>
+            <div v-if="product.sale_price" class="text-xs text-green-600 mt-1">
+              Sale: {{ formatCurrency(product.sale_price) }}
+            </div>
+          </td>
 
-              <td class="px-4 py-3 text-gray-600">
-                {{ product.stock_quantity }}
-              </td>
+          <td class="px-4 py-3 text-gray-600">
+            {{ product.stock_quantity }}
+          </td>
 
-              <td class="px-4 py-3">
-                <span
-                  class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
-                  :class="
-                    product.is_active
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-gray-100 text-gray-600'
-                  "
-                >
-                  {{ product.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </td>
+          <td class="px-4 py-3">
+            <AppBadge :variant="product.is_active ? 'green' : 'gray'">
+              {{ product.is_active ? 'Active' : 'Inactive' }}
+            </AppBadge>
+          </td>
 
-              <td class="px-4 py-3">
-                <div class="flex items-center gap-2">
-                  <RouterLink
-                    :to="`/products/${product.id}/edit`"
-                    class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Edit
-                  </RouterLink>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <RouterLink
+                :to="`/products/${product.id}/edit`"
+                class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Edit
+              </RouterLink>
 
-                  <button
-                    @click="handleDelete(product)"
-                    class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
+              <button
+                @click="handleDelete(product)"
+                class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </td>
+        </tr>
 
-            <tr
-              v-if="!productStore.listLoading && !productStore.products.length"
-            >
-              <td colspan="7" class="px-4 py-6 text-center text-gray-500">
-                No products found
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <tr v-if="!productStore.listLoading && !productStore.products.length">
+          <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+            No products found
+          </td>
+        </tr>
+      </tbody>
+    </AppTable>
 
-    <div v-if="productStore.meta" class="flex justify-end">
-      <AppPagination
-        :current-page="currentPage"
-        :total-pages="productStore.meta.last_page"
-        @page-changed="goToPage"
-      />
-    </div>
+    <AppPagination :meta="productStore.meta" @change="goToPage" />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useProductStore } from '@/stores/product';
-import { buildImageUrl, formatCurrency } from '@/utils/helpers';
 import { useConfirm } from '@/composables/useConfirm';
 import { useNotify } from '@/composables/useNotify';
+import { buildImageUrl, formatCurrency } from '@/utils/helpers';
+import AppTable from '@/components/ui/AppTable.vue';
 import AppPagination from '@/components/ui/AppPagination.vue';
+import AppBadge from '@/components/ui/AppBadge.vue';
 
 const productStore = useProductStore();
 const { confirm } = useConfirm();
 const notify = useNotify();
 const page = ref(1);
-
-const currentPage = computed(
-  () => productStore.meta?.current_page || page.value,
-);
 
 onMounted(() => {
   fetchProducts();
@@ -174,8 +149,24 @@ async function fetchProducts() {
 }
 
 async function goToPage(nextPage) {
+  if (!nextPage) return;
+  if (
+    productStore.meta &&
+    (nextPage < 1 || nextPage > productStore.meta.last_page)
+  )
+    return;
+
   page.value = nextPage;
   await fetchProducts();
+}
+
+function rowNumber(index) {
+  if (!productStore.meta) return index + 1;
+  return (
+    (productStore.meta.current_page - 1) * productStore.meta.per_page +
+    index +
+    1
+  );
 }
 
 async function handleDelete(product) {
@@ -186,6 +177,7 @@ async function handleDelete(product) {
     cancelText: 'Cancel',
     variant: 'danger',
   });
+
   if (!confirmed) return;
 
   try {
@@ -193,15 +185,7 @@ async function handleDelete(product) {
     notify.success('Product deleted successfully.');
     await fetchProducts();
   } catch (error) {
-    notify.error('Failed to delete product. Please try again.');
+    notify.error(error.response?.data?.message || 'Failed to delete product.');
   }
-}
-function rowNumber(index) {
-  if (!productStore.meta) return index + 1;
-  return (
-    (productStore.meta.current_page - 1) * productStore.meta.per_page +
-    index +
-    1
-  );
 }
 </script>

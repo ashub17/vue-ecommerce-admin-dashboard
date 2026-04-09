@@ -5,12 +5,10 @@
       <p class="text-sm text-gray-500 mt-1">Update category information</p>
     </div>
 
-    <div
+    <AppLoadingState
       v-if="categoryStore.loading"
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-gray-500"
-    >
-      Loading category...
-    </div>
+      message="Loading category..."
+    />
 
     <CategoryForm
       v-else
@@ -24,15 +22,20 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCategoryStore } from '@/stores/category';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import CategoryForm from '@/components/categories/CategoryForm.vue';
+import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
 
 const route = useRoute();
 const router = useRouter();
 const categoryStore = useCategoryStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 onMounted(() => {
   categoryStore.fetchCategory(route.params.id);
@@ -43,17 +46,15 @@ onUnmounted(() => {
 });
 
 async function handleUpdate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     await categoryStore.updateCategory(route.params.id, payload);
-    router.push('/categories');
+    notify.success('Category updated successfully.');
+    await router.push('/categories');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to update category.');
-    }
+    const message = getErrorMessage(error, 'Failed to update category.');
+    if (message) notify.error(message);
   }
 }
 </script>

@@ -5,12 +5,7 @@
       <p class="text-sm text-gray-500 mt-1">Update banner information</p>
     </div>
 
-    <div
-      v-if="bannerStore.loading"
-      class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 text-gray-500"
-    >
-      Loading banner...
-    </div>
+    <AppLoadingState v-if="bannerStore.loading" message="Loading banner..." />
 
     <BannerForm
       v-else
@@ -24,16 +19,21 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useBannerStore } from '@/stores/banner';
-import BannerForm from '@/components/banners/BannerForm.vue';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import { buildBannerFormData } from '@/utils/bannerFormData';
+import BannerForm from '@/components/banners/BannerForm.vue';
+import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
 
 const route = useRoute();
 const router = useRouter();
 const bannerStore = useBannerStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 onMounted(() => {
   bannerStore.fetchBanner(route.params.id);
@@ -44,18 +44,16 @@ onUnmounted(() => {
 });
 
 async function handleUpdate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     const formData = buildBannerFormData(payload, true);
     await bannerStore.updateBanner(route.params.id, formData);
-    router.push('/banners');
+    notify.success('Banner updated successfully.');
+    await router.push('/banners');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to update banner.');
-    }
+    const message = getErrorMessage(error, 'Failed to update banner.');
+    if (message) notify.error(message);
   }
 }
 </script>

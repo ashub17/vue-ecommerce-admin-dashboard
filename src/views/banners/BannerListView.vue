@@ -39,7 +39,7 @@
         </tr>
 
         <tr
-          v-for="(banner, index) in bannerStore.banners"
+          v-for="(banner, index) in safeBanners"
           :key="banner.id"
           class="border-t border-gray-100"
         >
@@ -123,20 +123,24 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useBannerStore } from '@/stores/banner';
-import { buildImageUrl } from '@/utils/helpers';
 import { useConfirm } from '@/composables/useConfirm';
 import { useNotify } from '@/composables/useNotify';
+import { buildImageUrl } from '@/utils/helpers';
 import AppTable from '@/components/ui/AppTable.vue';
 import AppPagination from '@/components/ui/AppPagination.vue';
 import AppBadge from '@/components/ui/AppBadge.vue';
 
 const bannerStore = useBannerStore();
-const page = ref(1);
 const { confirm } = useConfirm();
 const notify = useNotify();
+const page = ref(1);
 
-const currentPage = computed(
-  () => bannerStore.meta?.current_page || page.value,
+const safeBanners = computed(() =>
+  Array.isArray(bannerStore.banners)
+    ? bannerStore.banners.filter(
+        (banner) => banner && typeof banner === 'object',
+      )
+    : [],
 );
 
 onMounted(() => {
@@ -144,10 +148,21 @@ onMounted(() => {
 });
 
 async function fetchBanners() {
-  await bannerStore.fetchBanners({ page: page.value });
+  try {
+    await bannerStore.fetchBanners({ page: page.value });
+  } catch (error) {
+    notify.error(error.response?.data?.message || 'Failed to load banners.');
+  }
 }
 
 async function goToPage(nextPage) {
+  if (!nextPage) return;
+  if (
+    bannerStore.meta &&
+    (nextPage < 1 || nextPage > bannerStore.meta.last_page)
+  )
+    return;
+
   page.value = nextPage;
   await fetchBanners();
 }

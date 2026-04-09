@@ -17,29 +17,30 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useBannerStore } from '@/stores/banner';
-import BannerForm from '@/components/banners/BannerForm.vue';
+import { useFormErrors } from '@/composables/useFormErrors';
+import { useNotify } from '@/composables/useNotify';
 import { buildBannerFormData } from '@/utils/bannerFormData';
+import BannerForm from '@/components/banners/BannerForm.vue';
 
 const router = useRouter();
 const bannerStore = useBannerStore();
-const errors = ref({});
+const notify = useNotify();
+
+const { errors, clearErrors, getErrorMessage } = useFormErrors();
 
 async function handleCreate(payload) {
-  errors.value = {};
+  clearErrors();
 
   try {
     const formData = buildBannerFormData(payload);
     await bannerStore.createBanner(formData);
-    router.push('/banners');
+    notify.success('Banner created successfully.');
+    await router.push('/banners');
   } catch (error) {
-    if (error.response?.status === 422) {
-      errors.value = error.response.data.errors || {};
-    } else {
-      alert(error.response?.data?.message || 'Failed to create banner.');
-    }
+    const message = getErrorMessage(error, 'Failed to create banner.');
+    if (message) notify.error(message);
   }
 }
 </script>
