@@ -11,7 +11,7 @@ const routes = [
   {
     path: '/',
     component: () => import('@/layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true, requiresAdmin: true },
+    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -23,7 +23,6 @@ const routes = [
         component: () => import('@/views/dashboard/DashboardView.vue'),
       },
 
-      // categories
       {
         path: 'categories',
         name: 'categories.index',
@@ -41,7 +40,6 @@ const routes = [
         props: true,
       },
 
-      // products
       {
         path: 'products',
         name: 'products.index',
@@ -59,7 +57,6 @@ const routes = [
         props: true,
       },
 
-      // orders
       {
         path: 'orders',
         name: 'orders.index',
@@ -72,7 +69,6 @@ const routes = [
         props: true,
       },
 
-      // banners
       {
         path: 'banners',
         name: 'banners.index',
@@ -90,7 +86,6 @@ const routes = [
         props: true,
       },
 
-      // content blocks
       {
         path: 'content-blocks',
         name: 'contentBlocks.index',
@@ -123,16 +118,8 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore();
-
-  if (authStore.token && !authStore.user) {
-    try {
-      await authStore.initializeAuth();
-    } catch (error) {
-      return '/login';
-    }
-  }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return '/login';
@@ -142,9 +129,7 @@ router.beforeEach(async (to) => {
     return '/dashboard';
   }
 
-  if (to.meta.requiresAdmin && !authStore.isAdmin) {
-    return '/login';
-  }
+  return true;
 });
 
 export default router;

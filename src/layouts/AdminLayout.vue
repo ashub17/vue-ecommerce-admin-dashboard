@@ -16,8 +16,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import AdminSidebar from '@/components/layout/AdminSidebar.vue';
-import AdminNavbar from '@/components/layout/AdminNavbar.vue';
+import AdminSidebar from '@/components/layouts/AdminSidebar.vue';
+import AdminNavbar from '@/components/layouts/AdminNavbar.vue';
 
 const sidebarOpen = ref(false);
 </script>

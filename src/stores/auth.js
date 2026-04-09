@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { loginRequest, meRequest, logoutRequest } from '@/api/auth';
+import { loginRequest, logoutRequest } from '@/api/auth';
 import {
   setToken,
   getToken,
@@ -17,7 +17,6 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
-    isAdmin: (state) => state.user?.role === 'admin',
   },
 
   actions: {
@@ -46,31 +45,11 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async fetchMe() {
-      try {
-        const response = await meRequest();
-        this.user = response.data;
-        setUser(response.data);
-        return response.data;
-      } catch (error) {
-        this.logoutLocal();
-        throw error;
-      }
-    },
-
-    async initializeAuth() {
-      if (!this.token) return;
-
-      if (!this.user) {
-        await this.fetchMe();
-      }
-    },
-
     async logout() {
       try {
         await logoutRequest();
       } catch (error) {
-        // ignore network/logout endpoint failure
+        // ignore logout endpoint/network failure
       } finally {
         this.logoutLocal();
       }
@@ -79,6 +58,7 @@ export const useAuthStore = defineStore('auth', {
     logoutLocal() {
       this.token = null;
       this.user = null;
+      this.loading = false;
       clearAuthStorage();
     },
   },

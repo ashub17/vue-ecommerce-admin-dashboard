@@ -53,7 +53,7 @@ import StatCard from '@/components/dashboard/StatCard.vue';
 import LowStockTable from '@/components/dashboard/LowStockTable.vue';
 import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable.vue';
 import TopSellingTable from '@/components/dashboard/TopSellingTable.vue';
-import AppLoadingState from '@/components/AppLoadingState.vue';
+import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
 
 const dashboardStore = useDashboardStore();
 
