@@ -138,31 +138,12 @@
       </div>
     </div>
 
-    <div
-      v-if="productStore.meta"
-      class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 px-4 py-3"
-    >
-      <p class="text-sm text-gray-500">
-        Page {{ currentPage }} of {{ productStore.meta.last_page }}
-      </p>
-
-      <div class="flex items-center gap-2">
-        <button
-          @click="goToPage(currentPage - 1)"
-          :disabled="currentPage <= 1"
-          class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Prev
-        </button>
-
-        <button
-          @click="goToPage(currentPage + 1)"
-          :disabled="currentPage >= productStore.meta.last_page"
-          class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
+    <div v-if="productStore.meta" class="flex justify-end">
+      <AppPagination
+        :current-page="currentPage"
+        :total-pages="productStore.meta.last_page"
+        @page-changed="goToPage"
+      />
     </div>
   </div>
 </template>
@@ -171,8 +152,13 @@
 import { computed, onMounted, ref } from 'vue';
 import { useProductStore } from '@/stores/product';
 import { buildImageUrl, formatCurrency } from '@/utils/helpers';
+import { useConfirm } from '@/composables/useConfirm';
+import { useNotify } from '@/composables/useNotify';
+import AppPagination from '@/components/ui/AppPagination.vue';
 
 const productStore = useProductStore();
+const { confirm } = useConfirm();
+const notify = useNotify();
 const page = ref(1);
 
 const currentPage = computed(
@@ -193,14 +179,21 @@ async function goToPage(nextPage) {
 }
 
 async function handleDelete(product) {
-  const confirmed = window.confirm(`Delete product "${product.name}"?`);
+  const confirmed = await confirm({
+    title: 'Delete Product',
+    message: `Are you sure you want to delete "${product.name}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  });
   if (!confirmed) return;
 
   try {
     await productStore.removeProduct(product.id);
+    notify.success('Product deleted successfully.');
     await fetchProducts();
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to delete product.');
+    notify.error('Failed to delete product. Please try again.');
   }
 }
 function rowNumber(index) {

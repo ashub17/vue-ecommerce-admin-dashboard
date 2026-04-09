@@ -107,27 +107,36 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
 import { useCategoryStore } from '@/stores/category';
+import { useConfirm } from '@/composables/useConfirm';
+import { useNotify } from '@/composables/useNotify';
 
 const categoryStore = useCategoryStore();
-const message = ref('');
+const { confirm } = useConfirm();
+const notify = useNotify();
 
 onMounted(() => {
   categoryStore.fetchCategories();
 });
 
 async function handleDelete(category) {
-  const confirmed = window.confirm(`Delete category "${category.name}"?`);
+  const confirmed = await confirm({
+    title: 'Delete Category',
+    message: `Are you sure you want to delete "${category.name}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  });
 
   if (!confirmed) return;
 
   try {
     await categoryStore.removeCategory(category.id);
-    message.value = 'Category deleted successfully.';
+    notify.success('Category deleted successfully.');
     await categoryStore.fetchCategories();
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to delete category.');
+    notify.error(error.response?.data?.message || 'Failed to delete category.');
   }
 }
 </script>

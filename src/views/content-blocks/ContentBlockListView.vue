@@ -153,8 +153,12 @@
 import { computed, onMounted, ref } from 'vue';
 import { useContentBlockStore } from '@/stores/contentBlock';
 import { buildImageUrl } from '@/utils/helpers';
+import { useConfirm } from '@/composables/useConfirm';
+import { useNotify } from '@/composables/useNotify';
 
 const contentBlockStore = useContentBlockStore();
+const { confirm } = useConfirm();
+const notify = useNotify();
 const page = ref(1);
 
 const currentPage = computed(
@@ -185,14 +189,21 @@ function rowNumber(index) {
 }
 
 async function handleDelete(block) {
-  const confirmed = window.confirm(`Delete content block "${block.title}"?`);
+  const confirmed = await confirm({
+    title: 'Delete Content Block',
+    message: `Are you sure you want to delete "${block.title}"?`,
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    variant: 'danger',
+  });
   if (!confirmed) return;
 
   try {
     await contentBlockStore.removeContentBlock(block.id);
+    notify.success('Content block deleted successfully.');
     await fetchContentBlocks();
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to delete content block.');
+    notify.error('Failed to delete content block. Please try again.');
   }
 }
 </script>

@@ -54,12 +54,13 @@
               </td>
 
               <td class="px-4 py-3">
-                <span
-                  class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
-                  :class="orderStatusBadgeClass(order.status)"
+                <AppBadge
+                  :variant="
+                    badgeVariantFromClass(orderStatusBadgeClass(order.status))
+                  "
                 >
                   {{ order.status }}
-                </span>
+                </AppBadge>
               </td>
 
               <td class="px-4 py-3">
@@ -95,32 +96,7 @@
       </div>
     </div>
 
-    <div
-      v-if="orderStore.meta"
-      class="flex items-center justify-between bg-white rounded-2xl border border-gray-200 px-4 py-3"
-    >
-      <p class="text-sm text-gray-500">
-        Page {{ currentPage }} of {{ orderStore.meta.last_page }}
-      </p>
-
-      <div class="flex items-center gap-2">
-        <button
-          @click="goToPage(currentPage - 1)"
-          :disabled="currentPage <= 1"
-          class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Prev
-        </button>
-
-        <button
-          @click="goToPage(currentPage + 1)"
-          :disabled="currentPage >= orderStore.meta.last_page"
-          class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
-    </div>
+    <AppPagination :meta="orderStore.meta" @change="goToPage" />
   </div>
 </template>
 
@@ -132,6 +108,8 @@ import {
   orderStatusBadgeClass,
   paymentStatusBadgeClass,
 } from '@/utils/orderHelpers';
+import AppPagination from '@/components/ui/AppPagination.vue';
+import AppBadge from '@/components/ui/AppBadge.vue';
 
 const orderStore = useOrderStore();
 const page = ref(1);

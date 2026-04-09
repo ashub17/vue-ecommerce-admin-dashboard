@@ -7,12 +7,10 @@
       </p>
     </div>
 
-    <div
+    <AppLoadingState
       v-if="dashboardStore.loading"
-      class="bg-white rounded-2xl border border-gray-200 p-6"
-    >
-      Loading dashboard...
-    </div>
+      message="Loading dashboard..."
+    />
 
     <template v-else>
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
@@ -55,6 +53,7 @@ import StatCard from '@/components/dashboard/StatCard.vue';
 import LowStockTable from '@/components/dashboard/LowStockTable.vue';
 import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable.vue';
 import TopSellingTable from '@/components/dashboard/TopSellingTable.vue';
+import AppLoadingState from '@/components/AppLoadingState.vue';
 
 const dashboardStore = useDashboardStore();
 

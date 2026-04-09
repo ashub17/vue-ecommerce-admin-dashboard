@@ -20,9 +20,7 @@
           :key="item.name"
           :to="item.to"
           class="block px-4 py-2.5 rounded-lg text-sm font-medium transition"
-          :class="isActive(item.to)
-            ? 'bg-gray-900 text-white'
-            : 'text-gray-700 hover:bg-gray-100'"
+          :class="isActive(item) ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-100'"
         >
           {{ item.name }}
         </RouterLink>
@@ -43,15 +41,15 @@ defineEmits(['close'])
 const route = useRoute()
 
 const menuItems = [
-  { name: 'Dashboard', to: '/dashboard' },
-  { name: 'Categories', to: '/categories' },
-  { name: 'Products', to: '/products' },
-  { name: 'Orders', to: '/orders' },
-  { name: 'Banners', to: '/banners' },
-  { name: 'Content Blocks', to: '/content-blocks' },
+  { name: 'Dashboard', to: '/dashboard', match: /^\/dashboard/ },
+  { name: 'Categories', to: '/categories', match: /^\/categories/ },
+  { name: 'Products', to: '/products', match: /^\/products/ },
+  { name: 'Orders', to: '/orders', match: /^\/orders/ },
+  { name: 'Banners', to: '/banners', match: /^\/banners/ },
+  { name: 'Content Blocks', to: '/content-blocks', match: /^\/content-blocks/ },
 ]
 
-function isActive(path) {
-  return route.path.startsWith(path)
+function isActive(item) {
+  return item.match.test(route.path)
 }
 </script>

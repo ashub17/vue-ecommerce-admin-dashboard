@@ -6,7 +6,9 @@
       <AdminNavbar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
       <main class="p-4 md:p-6">
-        <RouterView />
+        <div class="max-w-7xl mx-auto">
+          <RouterView />
+        </div>
       </main>
     </div>
   </div>
