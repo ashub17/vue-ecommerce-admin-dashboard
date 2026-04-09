@@ -122,6 +122,19 @@
           />
           <span class="text-sm text-gray-700">Featured</span>
         </label>
+
+        <label class="inline-flex items-center gap-2">
+          <input
+            v-model="form.replace_gallery"
+            type="checkbox"
+            class="h-4 w-4 rounded border-gray-300"
+          />
+          <span class="text-sm text-gray-700">Replace Gallery</span>
+        </label>
+        <p v-if="form.replace_gallery" class="text-sm text-amber-600">
+          Uploading new gallery images will replace the existing gallery on
+          update.
+        </p>
       </div>
 
       <div class="border-t border-gray-200 pt-6 space-y-5">
@@ -285,6 +298,7 @@ const form = reactive({
   stock_quantity: '',
   is_active: true,
   is_featured: false,
+  replace_gallery: false,
   featured_image: null,
 });
 
@@ -324,10 +338,57 @@ watch(
 );
 
 watch(
-  () => form.name,
-  (value) => {
-    if (!props.initialValues?.id && !form.slug) {
-      form.slug = makeSlug(value);
+  () => props.initialValues,
+  (values) => {
+    form.category_id = values?.category_id ? String(values.category_id) : '';
+    form.name = values?.name ?? '';
+    form.sku = values?.sku ?? '';
+    form.slug = values?.slug ?? '';
+    form.short_description = values?.short_description ?? '';
+    form.description = values?.description ?? '';
+    form.price = values?.price ?? '';
+    form.sale_price = values?.sale_price ?? '';
+    form.stock_quantity = values?.stock_quantity ?? '';
+    form.is_active = values?.is_active ?? true;
+    form.is_featured = values?.is_featured ?? false;
+    form.featured_image = null;
+    form.replace_gallery = false;
+
+    featuredImagePreview.value =
+      values?.featured_image_url ||
+      (values?.featured_image ? buildImageUrl(values.featured_image) : '');
+
+    galleryInputs.value = Array.isArray(values?.images)
+      ? values.images.map((image, index) => ({
+          file: null,
+          sort_order: image.sort_order ?? index + 1,
+          preview:
+            image.image_url ||
+            (image.image_path ? buildImageUrl(image.image_path) : ''),
+          existing_id: image.id ?? null,
+        }))
+      : [];
+  },
+  { immediate: true, deep: true },
+);
+watch(
+  () => form.replace_gallery,
+  (enabled) => {
+    if (enabled && galleryInputs.value.length === 0) {
+      galleryInputs.value.push(
+        {
+          file: null,
+          sort_order: 1,
+          preview: '',
+          existing_id: null,
+        },
+        {
+          file: null,
+          sort_order: 2,
+          preview: '',
+          existing_id: null,
+        },
+      );
     }
   },
 );
@@ -375,6 +436,7 @@ function handleSubmit() {
     stock_quantity: form.stock_quantity,
     is_active: form.is_active,
     is_featured: form.is_featured,
+    replace_gallery: form.replace_gallery,
     featured_image: form.featured_image,
     images: galleryInputs.value,
   });

@@ -23,6 +23,7 @@
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-left text-gray-600">
             <tr>
+              <th class="px-4 py-3">#</th>
               <th class="px-4 py-3">Image</th>
               <th class="px-4 py-3">Name</th>
               <th class="px-4 py-3">SKU</th>
@@ -35,20 +36,26 @@
 
           <tbody>
             <tr v-if="productStore.listLoading">
-              <td colspan="7" class="px-4 py-6 text-center text-gray-500">
+              <td colspan="8" class="px-4 py-6 text-center text-gray-500">
                 Loading products...
               </td>
             </tr>
 
             <tr
-              v-for="product in productStore.products"
+              v-for="(product, index) in productStore.products"
               :key="product.id"
               class="border-t border-gray-100"
             >
+              <td class="px-4 py-3 text-gray-600">
+                {{ rowNumber(index) }}
+              </td>
               <td class="px-4 py-3">
                 <img
-                  v-if="product.featured_image"
-                  :src="buildImageUrl(product.featured_image)"
+                  v-if="product.featured_image || product.featured_image_url"
+                  :src="
+                    product.featured_image_url ||
+                    buildImageUrl(product.featured_image)
+                  "
                   alt="Product"
                   class="h-14 w-14 rounded-xl object-cover border border-gray-200"
                 />
@@ -195,5 +202,13 @@ async function handleDelete(product) {
   } catch (error) {
     alert(error.response?.data?.message || 'Failed to delete product.');
   }
+}
+function rowNumber(index) {
+  if (!productStore.meta) return index + 1;
+  return (
+    (productStore.meta.current_page - 1) * productStore.meta.per_page +
+    index +
+    1
+  );
 }
 </script>

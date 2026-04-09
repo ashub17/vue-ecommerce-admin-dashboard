@@ -21,9 +21,6 @@ export function updateProduct(id, payload) {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    params: {
-      _method: 'PUT',
-    },
   });
 }
 

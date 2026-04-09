@@ -1,9 +1,9 @@
 export function buildImageUrl(path) {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
 
-  const base = import.meta.env.VITE_STORAGE_BASE_URL || '';
-  return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+  const base = import.meta.env.VITE_STORAGE_BASE_URL || 'http://127.0.0.1:8000';
+  return `${base}/storage/${path.replace(/^\/+/, '')}`;
 }
 
 export function formatCurrency(value, currency = 'USD') {

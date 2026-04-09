@@ -13,6 +13,14 @@ export function buildProductFormData(payload, isUpdate = false) {
   formData.append('is_active', payload.is_active ? '1' : '0');
   formData.append('is_featured', payload.is_featured ? '1' : '0');
 
+  if (isUpdate) {
+    formData.append('_method', 'PUT');
+  }
+
+  if (payload.replace_gallery) {
+    formData.append('replace_gallery', '1');
+  }
+
   if (payload.featured_image instanceof File) {
     formData.append('featured_image', payload.featured_image);
   }
@@ -30,10 +38,6 @@ export function buildProductFormData(payload, isUpdate = false) {
         imageIndex++;
       }
     });
-  }
-
-  if (isUpdate) {
-    formData.append('_method', 'PUT');
   }
 
   return formData;
