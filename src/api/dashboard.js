@@ -1,5 +1,5 @@
 import api from './axios';
 
-export function getAdminDashboard() {
+export function getDashboard() {
   return api.get('/admin/dashboard');
 }

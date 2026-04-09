@@ -1,19 +1,21 @@
 import { defineStore } from 'pinia';
-import { getAdminDashboard } from '@/api/dashboard';
+import { getDashboard } from '@/api/dashboard';
 
 export const useDashboardStore = defineStore('dashboard', {
   state: () => ({
-    loading: false,
-    stats: {
+    summary: {
       total_users: 0,
       total_products: 0,
       total_categories: 0,
       total_orders: 0,
       total_revenue: 0,
     },
+
     lowStockProducts: [],
     recentOrders: [],
     topSellingProducts: [],
+
+    loading: false,
   }),
 
   actions: {
@@ -21,20 +23,26 @@ export const useDashboardStore = defineStore('dashboard', {
       this.loading = true;
 
       try {
-        const response = await getAdminDashboard();
-        const data = response.data;
+        const response = await getDashboard();
 
-        this.stats = {
-          total_users: data.total_users ?? 0,
-          total_products: data.total_products ?? 0,
-          total_categories: data.total_categories ?? 0,
-          total_orders: data.total_orders ?? 0,
-          total_revenue: data.total_revenue ?? 0,
-        };
+        // unwrap response
+        const payload = response.data?.data || {};
 
-        this.lowStockProducts = data.low_stock_products ?? [];
-        this.recentOrders = data.recent_orders ?? [];
-        this.topSellingProducts = data.top_selling_products ?? [];
+        this.summary = payload.summary || {};
+
+        this.lowStockProducts = Array.isArray(payload.low_stock_products)
+          ? payload.low_stock_products
+          : [];
+
+        this.recentOrders = Array.isArray(payload.recent_orders)
+          ? payload.recent_orders
+          : [];
+
+        this.topSellingProducts = Array.isArray(payload.top_selling_products)
+          ? payload.top_selling_products
+          : [];
+
+        return response;
       } finally {
         this.loading = false;
       }

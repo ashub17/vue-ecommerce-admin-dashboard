@@ -1,5 +1,6 @@
 <template>
   <div class="space-y-6">
+    <!-- Header -->
     <div>
       <h2 class="text-2xl font-bold text-gray-900">Dashboard</h2>
       <p class="text-sm text-gray-500 mt-1">
@@ -13,35 +14,79 @@
     />
 
     <template v-else>
-      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
-        <StatCard
-          title="Total Users"
-          :value="dashboardStore.stats.total_users"
-        />
-        <StatCard
-          title="Total Products"
-          :value="dashboardStore.stats.total_products"
-        />
-        <StatCard
-          title="Total Categories"
-          :value="dashboardStore.stats.total_categories"
-        />
-        <StatCard
-          title="Total Orders"
-          :value="dashboardStore.stats.total_orders"
-        />
-        <StatCard
-          title="Total Revenue"
-          :value="formatCurrency(dashboardStore.stats.total_revenue)"
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-5">
+        <SummaryCard title="Users" :value="summary.total_users" />
+        <SummaryCard title="Products" :value="summary.total_products" />
+        <SummaryCard title="Categories" :value="summary.total_categories" />
+        <SummaryCard title="Orders" :value="summary.total_orders" />
+        <SummaryCard
+          title="Revenue"
+          :value="formatCurrency(summary.total_revenue)"
         />
       </div>
 
+      <!-- Tables -->
       <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <LowStockTable :items="dashboardStore.lowStockProducts" />
-        <RecentOrdersTable :items="dashboardStore.recentOrders" />
-      </div>
+        <!-- Low Stock -->
+        <div class="bg-white rounded-2xl border p-5">
+          <h3 class="font-semibold mb-4">Low Stock Products</h3>
 
-      <TopSellingTable :items="dashboardStore.topSellingProducts" />
+          <ul v-if="dashboardStore.lowStockProducts.length" class="space-y-2">
+            <li
+              v-for="p in dashboardStore.lowStockProducts"
+              :key="p.id"
+              class="flex justify-between text-sm"
+            >
+              <span>{{ p.name }}</span>
+              <span class="text-red-600 font-medium">
+                {{ p.stock_quantity }}
+              </span>
+            </li>
+          </ul>
+
+          <p v-else class="text-sm text-gray-500">No low stock products</p>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="bg-white rounded-2xl border p-5">
+          <h3 class="font-semibold mb-4">Recent Orders</h3>
+
+          <ul v-if="dashboardStore.recentOrders.length" class="space-y-2">
+            <li
+              v-for="o in dashboardStore.recentOrders"
+              :key="o.id"
+              class="text-sm flex justify-between"
+            >
+              <span>#{{ o.order_number }}</span>
+              <span>{{ formatCurrency(o.total) }}</span>
+            </li>
+          </ul>
+
+          <p v-else class="text-sm text-gray-500">No recent orders</p>
+        </div>
+
+        <!-- Top Selling -->
+        <div class="bg-white rounded-2xl border p-5 xl:col-span-2">
+          <h3 class="font-semibold mb-4">Top Selling Products</h3>
+
+          <ul v-if="dashboardStore.topSellingProducts.length" class="space-y-2">
+            <li
+              v-for="p in dashboardStore.topSellingProducts"
+              :key="p.product_id"
+              class="flex justify-between text-sm"
+            >
+              <span>{{ p.product_name }}</span>
+              <span>
+                {{ p.total_quantity_sold }} sold •
+                {{ formatCurrency(p.total_sales) }}
+              </span>
+            </li>
+          </ul>
+
+          <p v-else class="text-sm text-gray-500">No sales data</p>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -49,23 +94,21 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useDashboardStore } from '@/stores/dashboard';
-import StatCard from '@/components/dashboard/StatCard.vue';
-import LowStockTable from '@/components/dashboard/LowStockTable.vue';
-import RecentOrdersTable from '@/components/dashboard/RecentOrdersTable.vue';
-import TopSellingTable from '@/components/dashboard/TopSellingTable.vue';
+import { useNotify } from '@/composables/useNotify';
+import { formatCurrency } from '@/utils/helpers';
 import AppLoadingState from '@/components/feedback/AppLoadingState.vue';
+import SummaryCard from '@/components/dashboard/SummaryCard.vue';
 
 const dashboardStore = useDashboardStore();
+const notify = useNotify();
 
-onMounted(() => {
-  dashboardStore.fetchDashboard();
+const summary = dashboardStore.summary;
+
+onMounted(async () => {
+  try {
+    await dashboardStore.fetchDashboard();
+  } catch (error) {
+    notify.error('Failed to load dashboard.');
+  }
 });
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 2,
-  }).format(Number(value || 0));
-}
 </script>
