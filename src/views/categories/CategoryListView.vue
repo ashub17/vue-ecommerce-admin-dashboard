@@ -67,8 +67,8 @@
               </RouterLink>
 
               <button
-                @click="handleDelete(category)"
                 class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
+                @click="handleDelete(category)"
               >
                 Delete
               </button>
@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useCategoryStore } from '@/stores/category';
 import { useConfirm } from '@/composables/useConfirm';
 import { useNotify } from '@/composables/useNotify';
@@ -103,10 +103,6 @@ const categoryStore = useCategoryStore();
 const { confirm } = useConfirm();
 const notify = useNotify();
 const page = ref(1);
-
-const currentPage = computed(
-  () => categoryStore.meta?.current_page || page.value,
-);
 
 onMounted(() => {
   fetchCategories();

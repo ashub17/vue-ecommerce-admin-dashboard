@@ -9,9 +9,14 @@ const routes = [
     meta: { guestOnly: true },
   },
   {
+    path: '/403',
+    name: 'forbidden',
+    component: () => import('@/views/errors/ForbiddenView.vue'),
+  },
+  {
     path: '/',
     component: () => import('@/layouts/AdminLayout.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: '',
@@ -125,8 +130,12 @@ router.beforeEach((to) => {
     return '/login';
   }
 
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+    return '/403';
+  }
+
   if (to.meta.guestOnly && authStore.isAuthenticated) {
-    return '/dashboard';
+    return authStore.isAdmin ? '/dashboard' : '/403';
   }
 
   return true;

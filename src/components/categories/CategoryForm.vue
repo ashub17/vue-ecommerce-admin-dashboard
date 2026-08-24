@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-    <form @submit.prevent="handleSubmit" class="space-y-5">
+    <form class="space-y-5" @submit.prevent="handleSubmit">
       <AppInput
         v-model="form.name"
         label="Category Name"

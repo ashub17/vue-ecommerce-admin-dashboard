@@ -104,8 +104,8 @@
               </RouterLink>
 
               <button
-                @click="handleDelete(product)"
                 class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
+                @click="handleDelete(product)"
               >
                 Delete
               </button>

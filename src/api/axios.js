@@ -33,6 +33,14 @@ api.interceptors.response.use(
       }
     }
 
+    // The token is valid but the account lacks the admin role. Keep the
+    // session and send the user to the dedicated forbidden screen.
+    if (error.response?.status === 403) {
+      if (router.currentRoute.value.path !== '/403') {
+        await router.replace('/403');
+      }
+    }
+
     return Promise.reject(error);
   },
 );

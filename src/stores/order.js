@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getOrders, getOrder, updateOrder } from '@/api/orders';
+import { unwrapItem, unwrapList } from '@/utils/apiResponse';
 
 export const useOrderStore = defineStore('order', {
   state: () => ({
@@ -19,28 +20,10 @@ export const useOrderStore = defineStore('order', {
 
       try {
         const response = await getOrders(params);
+        const { items, meta } = unwrapList(response);
 
-        // Supports both:
-        // 1) Laravel paginator directly in response.data
-        // 2) Wrapped paginator in response.data.data
-        const payload = response.data?.data?.data
-          ? response.data.data
-          : response.data;
-
-        if (Array.isArray(payload)) {
-          this.orders = payload;
-          this.meta = null;
-        } else {
-          this.orders = Array.isArray(payload?.data) ? payload.data : [];
-          this.meta = payload
-            ? {
-                current_page: payload.current_page ?? 1,
-                last_page: payload.last_page ?? 1,
-                per_page: payload.per_page ?? this.orders.length ?? 0,
-                total: payload.total ?? this.orders.length ?? 0,
-              }
-            : null;
-        }
+        this.orders = items;
+        this.meta = meta;
 
         return response;
       } finally {
@@ -53,12 +36,7 @@ export const useOrderStore = defineStore('order', {
 
       try {
         const response = await getOrder(id);
-
-        // Supports:
-        // 1) response.data = order
-        // 2) response.data.data = order
-        this.order = response.data?.data || response.data || null;
-
+        this.order = unwrapItem(response);
         return this.order;
       } finally {
         this.loading = false;
@@ -70,7 +48,7 @@ export const useOrderStore = defineStore('order', {
 
       try {
         const response = await updateOrder(id, payload);
-        this.order = response.data?.data || response.data || this.order;
+        this.order = unwrapItem(response) ?? this.order;
         return response;
       } finally {
         this.submitLoading = false;

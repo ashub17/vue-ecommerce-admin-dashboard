@@ -6,6 +6,7 @@ import {
   updateBanner,
   deleteBanner,
 } from '@/api/banners';
+import { unwrapItem, unwrapList } from '@/utils/apiResponse';
 
 export const useBannerStore = defineStore('banner', {
   state: () => ({
@@ -26,28 +27,10 @@ export const useBannerStore = defineStore('banner', {
 
       try {
         const response = await getBanners(params);
+        const { items, meta } = unwrapList(response);
 
-        // Supports both:
-        // 1) paginator directly in response.data
-        // 2) wrapped paginator in response.data.data
-        const payload = response.data?.data?.data
-          ? response.data.data
-          : response.data;
-
-        if (Array.isArray(payload)) {
-          this.banners = payload;
-          this.meta = null;
-        } else {
-          this.banners = Array.isArray(payload?.data) ? payload.data : [];
-          this.meta = payload
-            ? {
-                current_page: payload.current_page ?? 1,
-                last_page: payload.last_page ?? 1,
-                per_page: payload.per_page ?? this.banners.length ?? 0,
-                total: payload.total ?? this.banners.length ?? 0,
-              }
-            : null;
-        }
+        this.banners = items;
+        this.meta = meta;
 
         return response;
       } finally {
@@ -60,7 +43,7 @@ export const useBannerStore = defineStore('banner', {
 
       try {
         const response = await getBanner(id);
-        this.banner = response.data?.data || response.data || null;
+        this.banner = unwrapItem(response);
         return this.banner;
       } finally {
         this.loading = false;

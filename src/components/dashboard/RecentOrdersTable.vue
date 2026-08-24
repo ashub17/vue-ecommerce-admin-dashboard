@@ -20,12 +20,12 @@
             :key="order.id"
             class="border-t border-gray-100"
           >
-            <td class="px-4 py-3">#{{ order.id }}</td>
             <td class="px-4 py-3">
-              {{ order.customer_name || order.user?.name }}
+              {{ order.order_number || `#${order.id}` }}
             </td>
+            <td class="px-4 py-3">{{ order.user?.name || '-' }}</td>
             <td class="px-4 py-3">{{ order.status }}</td>
-            <td class="px-4 py-3">{{ order.total_amount }}</td>
+            <td class="px-4 py-3">{{ formatCurrency(order.total) }}</td>
           </tr>
 
           <tr v-if="!items.length">
@@ -40,6 +40,8 @@
 </template>
 
 <script setup>
+import { formatCurrency } from '@/utils/helpers';
+
 defineProps({
   items: {
     type: Array,

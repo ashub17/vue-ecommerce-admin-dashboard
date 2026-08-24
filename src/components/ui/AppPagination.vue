@@ -9,17 +9,17 @@
 
     <div class="flex items-center gap-2">
       <button
-        @click="$emit('change', meta.current_page - 1)"
         :disabled="meta.current_page <= 1"
         class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
+        @click="$emit('change', meta.current_page - 1)"
       >
         Prev
       </button>
 
       <button
-        @click="$emit('change', meta.current_page + 1)"
         :disabled="meta.current_page >= meta.last_page"
         class="rounded-lg border border-gray-300 px-3 py-2 text-sm disabled:opacity-50"
+        @click="$emit('change', meta.current_page + 1)"
       >
         Next
       </button>

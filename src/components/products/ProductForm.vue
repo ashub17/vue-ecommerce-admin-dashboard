@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <AppSelect
           v-model="form.category_id"
@@ -119,8 +119,8 @@
           <input
             type="file"
             accept="image/*"
-            @change="handleFeaturedImage"
             class="block w-full text-sm text-gray-700"
+            @change="handleFeaturedImage"
           />
 
           <p v-if="errors.featured_image" class="text-sm text-red-500 mt-1">
@@ -144,8 +144,8 @@
 
             <button
               type="button"
-              @click="addGalleryRow"
               class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              @click="addGalleryRow"
             >
               Add Image Row
             </button>
@@ -164,8 +164,8 @@
                 <input
                   type="file"
                   accept="image/*"
-                  @change="(e) => handleGalleryImage(index, e)"
                   class="block w-full text-sm text-gray-700"
+                  @change="(e) => handleGalleryImage(index, e)"
                 />
               </div>
 
@@ -200,8 +200,8 @@
               <div class="md:col-span-1 flex md:justify-end">
                 <button
                   type="button"
-                  @click="removeGalleryRow(index)"
                   class="rounded-lg bg-red-500 px-3 py-2 text-xs font-medium text-white hover:bg-red-600"
+                  @click="removeGalleryRow(index)"
                 >
                   Remove
                 </button>

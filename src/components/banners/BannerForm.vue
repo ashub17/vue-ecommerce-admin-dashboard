@@ -1,6 +1,6 @@
 <template>
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-    <form @submit.prevent="handleSubmit" class="space-y-6">
+    <form class="space-y-6" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <AppInput
           v-model="form.title"
@@ -61,8 +61,8 @@
         <input
           type="file"
           accept="image/*"
-          @change="handleImageChange"
           class="block w-full text-sm text-gray-700"
+          @change="handleImageChange"
         />
 
         <p v-if="errors.image" class="text-sm text-red-500 mt-1">

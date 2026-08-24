@@ -16,20 +16,20 @@
 
       <div class="mt-6 flex items-center justify-end gap-3">
         <button
-          @click="confirmStore.cancel()"
           class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          @click="confirmStore.cancel()"
         >
           {{ confirmStore.cancelText }}
         </button>
 
         <button
-          @click="confirmStore.confirm()"
           class="rounded-lg px-4 py-2 text-sm font-medium text-white"
           :class="
             confirmStore.variant === 'danger'
               ? 'bg-red-500 hover:bg-red-600'
               : 'bg-gray-900 hover:bg-black'
           "
+          @click="confirmStore.confirm()"
         >
           {{ confirmStore.confirmText }}
         </button>

@@ -6,6 +6,7 @@ import {
   updateProduct,
   deleteProduct,
 } from '@/api/products';
+import { unwrapItem, unwrapList } from '@/utils/apiResponse';
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -26,20 +27,10 @@ export const useProductStore = defineStore('product', {
 
       try {
         const response = await getProducts(params);
-        const data = response.data;
+        const { items, meta } = unwrapList(response);
 
-        if (Array.isArray(data)) {
-          this.products = data;
-          this.meta = null;
-        } else {
-          this.products = data.data || [];
-          this.meta = {
-            current_page: data.current_page,
-            last_page: data.last_page,
-            per_page: data.per_page,
-            total: data.total,
-          };
-        }
+        this.products = items;
+        this.meta = meta;
 
         return response;
       } finally {
@@ -52,7 +43,7 @@ export const useProductStore = defineStore('product', {
 
       try {
         const response = await getProduct(id);
-        this.product = response.data?.data || response.data;
+        this.product = unwrapItem(response);
         return this.product;
       } finally {
         this.loading = false;

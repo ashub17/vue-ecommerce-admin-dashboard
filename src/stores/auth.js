@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { loginRequest, logoutRequest } from '@/api/auth';
+import { loginRequest, logoutRequest, meRequest } from '@/api/auth';
+import { unwrapItem } from '@/utils/apiResponse';
 import {
   setToken,
   getToken,
@@ -7,6 +8,12 @@ import {
   getUser,
   clearAuthStorage,
 } from '@/utils/storage';
+
+function roleNames(user) {
+  return (user?.roles || []).map((role) =>
+    typeof role === 'string' ? role : role.name,
+  );
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -17,6 +24,8 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => !!state.token,
+    roles: (state) => roleNames(state.user),
+    isAdmin: (state) => roleNames(state.user).includes('admin'),
   },
 
   actions: {
@@ -27,10 +36,18 @@ export const useAuthStore = defineStore('auth', {
         const response = await loginRequest(form);
 
         const token = response.data?.token;
-        const user = response.data?.user;
+        const user = unwrapItem(response);
 
         if (!token || !user) {
           throw new Error('Invalid login response');
+        }
+
+        if (!roleNames(user).includes('admin')) {
+          clearAuthStorage();
+
+          throw new Error(
+            'This account does not have access to the admin dashboard.',
+          );
         }
 
         this.token = token;
@@ -42,6 +59,29 @@ export const useAuthStore = defineStore('auth', {
         return response;
       } finally {
         this.loading = false;
+      }
+    },
+
+    // Refreshes the cached user so a role revoked server-side is reflected in
+    // the client-side route guards on the next navigation.
+    async fetchMe() {
+      if (!this.token) {
+        return null;
+      }
+
+      try {
+        const response = await meRequest();
+        const user = unwrapItem(response);
+
+        if (user) {
+          this.user = user;
+          setUser(user);
+        }
+
+        return user;
+      } catch (error) {
+        // 401 is already handled by the axios interceptor.
+        return null;
       }
     },
 

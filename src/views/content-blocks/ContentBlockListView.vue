@@ -85,8 +85,8 @@
               </RouterLink>
 
               <button
-                @click="handleDelete(block)"
                 class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-600"
+                @click="handleDelete(block)"
               >
                 Delete
               </button>

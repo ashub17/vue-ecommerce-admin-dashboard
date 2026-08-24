@@ -14,7 +14,7 @@
         error
           ? 'border-red-300 focus:ring-red-400'
           : 'border-gray-300 focus:ring-gray-900',
-        disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+        disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white',
       ]"
       @input="$emit('update:modelValue', $event.target.value)"
     />
@@ -36,7 +36,7 @@ defineProps({
   },
   error: String,
   disabled: Boolean,
-})
+});
 
-defineEmits(['update:modelValue'])
+defineEmits(['update:modelValue']);
 </script>

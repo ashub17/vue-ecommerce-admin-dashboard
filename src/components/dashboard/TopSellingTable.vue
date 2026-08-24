@@ -16,12 +16,12 @@
         <tbody>
           <tr
             v-for="product in items"
-            :key="product.id"
+            :key="product.product_id"
             class="border-t border-gray-100"
           >
-            <td class="px-4 py-3">{{ product.name }}</td>
-            <td class="px-4 py-3">{{ product.total_sold }}</td>
-            <td class="px-4 py-3">{{ product.total_revenue }}</td>
+            <td class="px-4 py-3">{{ product.product_name }}</td>
+            <td class="px-4 py-3">{{ product.total_quantity_sold }}</td>
+            <td class="px-4 py-3">{{ formatCurrency(product.total_sales) }}</td>
           </tr>
 
           <tr v-if="!items.length">
@@ -36,6 +36,8 @@
 </template>
 
 <script setup>
+import { formatCurrency } from '@/utils/helpers';
+
 defineProps({
   items: {
     type: Array,

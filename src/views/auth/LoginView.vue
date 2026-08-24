@@ -8,7 +8,7 @@
         </p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <form class="space-y-4" @submit.prevent="handleLogin">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">
             Email
@@ -96,8 +96,15 @@ async function handleLogin() {
       return;
     }
 
+    if (error.response?.status === 429) {
+      message.value = 'Too many login attempts. Please try again in a minute.';
+      return;
+    }
+
     message.value =
-      error.response?.data?.message || 'Login failed. Please try again.';
+      error.response?.data?.message ||
+      error.message ||
+      'Login failed. Please try again.';
     console.error('Login error:', error);
   }
 }

@@ -20,8 +20,10 @@
             class="border-t border-gray-100"
           >
             <td class="px-4 py-3">{{ product.name }}</td>
-            <td class="px-4 py-3">{{ product.stock }}</td>
-            <td class="px-4 py-3">{{ product.price }}</td>
+            <td class="px-4 py-3">{{ product.stock_quantity }}</td>
+            <td class="px-4 py-3">
+              {{ formatCurrency(product.current_price) }}
+            </td>
           </tr>
 
           <tr v-if="!items.length">
@@ -36,6 +38,8 @@
 </template>
 
 <script setup>
+import { formatCurrency } from '@/utils/helpers';
+
 defineProps({
   items: {
     type: Array,

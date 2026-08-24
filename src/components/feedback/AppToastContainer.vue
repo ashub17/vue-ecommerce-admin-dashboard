@@ -17,8 +17,8 @@
             </div>
 
             <button
-              @click="uiStore.removeToast(toast.id)"
               class="text-gray-400 hover:text-gray-600 text-sm"
+              @click="uiStore.removeToast(toast.id)"
             >
               ✕
             </button>

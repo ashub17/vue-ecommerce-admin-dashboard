@@ -2,7 +2,7 @@
   <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
     <h3 class="text-lg font-semibold text-gray-900 mb-4">Update Order</h3>
 
-    <form @submit.prevent="handleSubmit" class="space-y-5">
+    <form class="space-y-5" @submit.prevent="handleSubmit">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <AppSelect
           v-model="form.status"

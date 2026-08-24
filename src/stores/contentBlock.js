@@ -6,6 +6,7 @@ import {
   updateContentBlock,
   deleteContentBlock,
 } from '@/api/contentBlocks';
+import { unwrapItem, unwrapList } from '@/utils/apiResponse';
 
 export const useContentBlockStore = defineStore('contentBlock', {
   state: () => ({
@@ -26,28 +27,10 @@ export const useContentBlockStore = defineStore('contentBlock', {
 
       try {
         const response = await getContentBlocks(params);
+        const { items, meta } = unwrapList(response);
 
-        // Supports both:
-        // 1) paginator directly in response.data
-        // 2) wrapped paginator in response.data.data
-        const payload = response.data?.data?.data
-          ? response.data.data
-          : response.data;
-
-        if (Array.isArray(payload)) {
-          this.contentBlocks = payload;
-          this.meta = null;
-        } else {
-          this.contentBlocks = Array.isArray(payload?.data) ? payload.data : [];
-          this.meta = payload
-            ? {
-                current_page: payload.current_page ?? 1,
-                last_page: payload.last_page ?? 1,
-                per_page: payload.per_page ?? this.contentBlocks.length ?? 0,
-                total: payload.total ?? this.contentBlocks.length ?? 0,
-              }
-            : null;
-        }
+        this.contentBlocks = items;
+        this.meta = meta;
 
         return response;
       } finally {
@@ -60,7 +43,7 @@ export const useContentBlockStore = defineStore('contentBlock', {
 
       try {
         const response = await getContentBlock(id);
-        this.contentBlock = response.data?.data || response.data || null;
+        this.contentBlock = unwrapItem(response);
         return this.contentBlock;
       } finally {
         this.loading = false;

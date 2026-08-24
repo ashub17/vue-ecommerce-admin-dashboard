@@ -6,6 +6,7 @@ import {
   updateCategory,
   deleteCategory,
 } from '@/api/categories';
+import { unwrapItem, unwrapList } from '@/utils/apiResponse';
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({
@@ -26,20 +27,10 @@ export const useCategoryStore = defineStore('category', {
 
       try {
         const response = await getCategories(params);
-        const data = response.data;
+        const { items, meta } = unwrapList(response);
 
-        if (Array.isArray(data)) {
-          this.categories = data;
-          this.meta = null;
-        } else {
-          this.categories = data.data || [];
-          this.meta = {
-            current_page: data.current_page,
-            last_page: data.last_page,
-            per_page: data.per_page,
-            total: data.total,
-          };
-        }
+        this.categories = items;
+        this.meta = meta;
 
         return response;
       } finally {
@@ -52,7 +43,7 @@ export const useCategoryStore = defineStore('category', {
 
       try {
         const response = await getCategory(id);
-        this.category = response.data?.data || response.data;
+        this.category = unwrapItem(response);
         return this.category;
       } finally {
         this.loading = false;
@@ -63,8 +54,7 @@ export const useCategoryStore = defineStore('category', {
       this.submitLoading = true;
 
       try {
-        const response = await createCategory(payload);
-        return response;
+        return await createCategory(payload);
       } finally {
         this.submitLoading = false;
       }
@@ -74,8 +64,7 @@ export const useCategoryStore = defineStore('category', {
       this.submitLoading = true;
 
       try {
-        const response = await updateCategory(id, payload);
-        return response;
+        return await updateCategory(id, payload);
       } finally {
         this.submitLoading = false;
       }
@@ -85,8 +74,7 @@ export const useCategoryStore = defineStore('category', {
       this.deleteLoading = true;
 
       try {
-        const response = await deleteCategory(id);
-        return response;
+        return await deleteCategory(id);
       } finally {
         this.deleteLoading = false;
       }
