@@ -107,9 +107,7 @@
               <div>
                 <p class="text-gray-500">Total Amount</p>
                 <p class="font-medium text-gray-900 mt-1">
-                  {{
-                    formatCurrency(orderData.total_amount || orderData.total)
-                  }}
+                  {{ formatCurrency(orderData.total) }}
                 </p>
               </div>
 
